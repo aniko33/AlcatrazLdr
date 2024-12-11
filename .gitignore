@@ -1,0 +1,4 @@
+out/
+tests/*.exe
+shellcode.bin
+src/shellcode/cargo.h

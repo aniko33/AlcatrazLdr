@@ -1,0 +1,2 @@
+
+int GlobalInt = 100;

@@ -1,0 +1,3 @@
+[
+  {"directory": "/home/aniko/Documents/code/malware/alcatrazLdr/", "command": "clang -target x86_64-pc-windows-gnu main.c -lntdll -I../lib/ -Iinclude -DDEBUG", "file": "src/main.c"}
+]
