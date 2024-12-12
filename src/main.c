@@ -56,6 +56,7 @@ int main() {
     ))) {
 #ifdef DEBUG
         printf("OpenProcess ERROR: 0x%x", GetLastError());
+        getchar();
 #endif
         return -1;
     }
@@ -84,13 +85,8 @@ int main() {
         &moduleStomping
     );
 
-#ifdef DEBUG
-    printf("Press enter for execute...");
-    getchar();
-#endif
-
     // [ Start the injection ]
-    Inject(hproc, completionIoHandle, moduleStomping.trampolineAddr);
+    Inject(hproc, completionIoHandle, moduleStomping.executionAddr);
 
 #ifdef DEBUG
     printf("Press enter for close the program...");

