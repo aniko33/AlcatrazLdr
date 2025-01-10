@@ -15,3 +15,5 @@ main_dbg: ade
 
 objector: 
 	$(CC) tools/objector.c $(CFLAGS) -o out/objector.exe
+
+build: main_dbg copy

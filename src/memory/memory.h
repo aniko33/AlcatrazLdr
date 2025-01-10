@@ -3,17 +3,15 @@
 
 #include <windows.h>
 
-typedef struct MODULE_STOMPING {
+typedef struct _MEMORY_ALLOC {
     LPVOID executionAddr;
-} MODULE_STOMPING;
+} MEMORY_ALLOC;
 
-WINBOOL ModuleStomping(
-    HANDLE hproc,
-    char* pathTargetModule,
+WINBOOL ThreadNameAlloc(
+    HANDLE hProcess,
     PBYTE shellcode,
-    size_t sizeShellcode,
-    size_t sizePathTargetModule,
-    MODULE_STOMPING* moduleStompingOut
+    size_t shellcodeSize,
+    MEMORY_ALLOC* moduleAllocOut
 );
 
 #endif

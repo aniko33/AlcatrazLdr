@@ -4,6 +4,10 @@
 #include <unwin.h>
 
 // { Macros }
+
+/*
+    Fast use of ADE - is a great option for all indirect-syscalls
+*/
 #define CallAde(SINNER, FUNCNAME, OUTSTATUS, ...)       \
     SINNER = NewSinner(FUNCNAME, GlobalAde);            \
     NewAde(SINNER.SyscallAddr);                         \
@@ -25,6 +29,7 @@ typedef struct AdeSinner {
 } AdeSinner;
 
 // { Functions }
+
 Ade InitAde();
 AdeSinner NewSinner(char* tFuncname, Ade ade);
 

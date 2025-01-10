@@ -1,21 +1,19 @@
 #ifndef DEBUGGING_H
 #define DEBUGGING_H
 
+#define TEXT_RED(TEXT) "\033[91m" TEXT "\033[0m"
+#define TEXT_CYAN(TEXT) "\033[96m" TEXT "\033[0m"
+
 #ifdef DEBUG
-#define DEBUG_ERROR(FUNCNAME) printf("%s ERROR\n", FUNCNAME);
-#define DEBUG_SERROR(FUNCNAME, MESSAGE, ERROR) printf("%s %s ERROR: %s\n", FUNCNAME, MESSAGE, ERROR);
-#define DEBUG_HERROR(FUNCNAME, MESSAGE, ERROR) printf("%s %s ERROR: 0x%x\n", FUNCNAME, MESSAGE, ERROR);
-#define DEBUG_LHERROR(FUNCNAME, MESSAGE, ERROR) printf("%s %s ERROR: 0x%p\n", FUNCNAME, MESSAGE, ERROR);
-#define DEBUG_DERROR(FUNCNAME, MESSAGE, ERROR) printf("%s %s ERROR: %d\n", FUNCNAME, MESSAGE, ERROR);
-#define DEBUG_INFO(MESSAGE, ...) printf( MESSAGE "\n", __VA_ARGS__);
-#else 
-#define DEBUG_ERROR(FUNCNAME)
-#define DEBUG_SERROR(FUNCNAME, MESSAGE, ERROR)
-#define DEBUG_HERROR(FUNCNAME, MESSAGE, ERROR)
-#define DEBUG_LHERROR(FUNCNAME, MESSAGE, ERROR)
-#define DEBUG_DERROR(FUNCNAME, MESSAGE, ERROR)
-
-#define DEBUG_INFO(MESSAGE, ...)
+#define DEBUG_ERROR(FMT, ...) printf("[" TEXT_RED("!") "] " FMT "\n", ##__VA_ARGS__);
+#define DEBUG_INFO(FMT, ...) printf("[" TEXT_CYAN("i") "] " FMT "\n", ##__VA_ARGS__);
+#define DEBUG_GETCHAR() printf("Press enter for close the program..."); \
+    getchar();
+#else
+#define DEBUG_ERROR(FUNCNAME, MESSAGE, ERROR, ...)
+#define DEBUG_INFO(FUNCNAME, MESSAGE, ...)
+#define DEBUG_GETCHAR
 #endif
 
 #endif
+
