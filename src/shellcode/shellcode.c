@@ -1,4 +1,6 @@
-// Manage the shellcode
+/* 
+*   Description: Manage the shellcode
+*/
 
 #include <string.h>
 

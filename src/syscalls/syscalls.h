@@ -11,7 +11,7 @@
 #define CallAde(SINNER, FUNCNAME, OUTSTATUS, ...)       \
     SINNER = NewSinner(FUNCNAME, GlobalAde);            \
     NewAde(SINNER.SyscallAddr);                         \
-    OUTSTATUS = ExecuteAde( __VA_ARGS__ );              \
+    OUTSTATUS = ExecuteAde( __VA_ARGS__ )               \
 
 // { Externs }
 FASTCALL void NewAde(PVOID SyscallAddr);
