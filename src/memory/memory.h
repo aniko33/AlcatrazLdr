@@ -2,6 +2,7 @@
 #define MEMORY_H
 
 #include <windows.h>
+#include <unwin.h>
 
 typedef struct _MEMORY_ALLOC {
     LPVOID executionAddr;
@@ -12,6 +13,14 @@ WINBOOL ThreadNameAlloc(
     PBYTE shellcode,
     size_t shellcodeSize,
     MEMORY_ALLOC* moduleAllocOut
+);
+
+WINBOOL SleepObf(
+    HANDLE hProcess,
+    LPVOID ptrRegion,
+    SIZE_T regionSize,
+    ULONG time,
+    UNICODE_STRING key
 );
 
 #endif

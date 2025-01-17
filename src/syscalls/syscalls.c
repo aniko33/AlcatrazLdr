@@ -2,12 +2,11 @@
     Search SSNs and execute the syscalls
 */
 
+#include <stdio.h>
 #include <unwin.h>
 
+#include "../debugging/debugging.h"
 #include "syscalls.h"
-
-extern FASTCALL void NewAde(PVOID SyscallAddr);
-extern __attribute__((ms_abi)) NTSTATUS ExecuteAde();
 
 Ade GlobalAde;
 
@@ -32,8 +31,21 @@ AdeSinner NewSinner(char* tFuncname, Ade ade) {
         char* funcName = (char*)((PBYTE)ade.Base + exportsNames[i]);
         PVOID funcAddr = ((PBYTE)ade.Base + exportsFuncs[exportsOrdinals[i]]);
         if (strcmp(funcName, tFuncname) == 0) {
-            AdeSinner sinner = { 1, funcAddr + 3 };
-            return sinner;
+            if ( *((PBYTE) funcAddr + 3) == 0xb8 ) {
+                BYTE highSyscallNumber = *((PBYTE)funcAddr + 5);
+                BYTE lowSyscallNumber = *((PBYTE)funcAddr + 4);
+                AdeSinner sinner = {
+                    .Success = 1,
+                    (highSyscallNumber << 8) | lowSyscallNumber
+                };
+
+                return sinner;
+            } else {
+                AdeSinner sinner = {
+                    0,
+                    0
+                };
+            }
         }
     }
 

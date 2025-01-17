@@ -10,12 +10,13 @@
 */
 #define CallAde(SINNER, FUNCNAME, OUTSTATUS, ...)       \
     SINNER = NewSinner(FUNCNAME, GlobalAde);            \
-    NewAde(SINNER.SyscallAddr);                         \
-    OUTSTATUS = ExecuteAde( __VA_ARGS__ )               \
+    NewAde(SINNER.SyscallNumber);                       \
+    OUTSTATUS = SINNER.Success ? ExecuteAde( __VA_ARGS__ ) : 0xFF
 
 // { Externs }
-FASTCALL void NewAde(PVOID SyscallAddr);
-__attribute__((ms_abi)) NTSTATUS ExecuteAde();
+FASTCALL VOID NewAde(int SyscallNumber);
+NTSTATUS NTAPI ExecuteAde();
+// __attribute__((ms_abi)) NTSTATUS ExecuteAde();
 
 // { Structs }
 typedef struct Ade {
@@ -25,7 +26,7 @@ typedef struct Ade {
 
 typedef struct AdeSinner {
     int Success;
-    PVOID SyscallAddr;
+    int SyscallNumber;
 } AdeSinner;
 
 // { Functions }

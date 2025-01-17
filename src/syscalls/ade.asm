@@ -1,14 +1,16 @@
 section .data
-    SyscallAddr dq 0x0
+    SyscallNum db 0h
 
 section .text
     global NewAde
     global ExecuteAde
 
 NewAde: ; FASTCALL
-    mov [rel SyscallAddr], rdx
+    mov [rel SyscallNum], rcx
     ret
 
 ExecuteAde: ; MS_ABI
     mov r10, rcx
-    jmp [rel SyscallAddr]
+    mov rax, [rel SyscallNum]
+    syscall
+    ret
