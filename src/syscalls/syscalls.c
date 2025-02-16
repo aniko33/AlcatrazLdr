@@ -17,7 +17,7 @@ Ade InitAde() {
     PIMAGE_DOS_HEADER dllPe         = (PIMAGE_DOS_HEADER) entry->DllBase;
     PIMAGE_NT_HEADERS dllPeNt       = (PIMAGE_NT_HEADERS) ((PBYTE)dllPe + dllPe->e_lfanew);
     PIMAGE_EXPORT_DIRECTORY exports = (PIMAGE_EXPORT_DIRECTORY) ((PBYTE)dllPe + dllPeNt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
-    
+
     Ade ade = { dllPe, exports };
     return ade;
 }

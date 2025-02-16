@@ -9,9 +9,9 @@
 #define DEBUG_INFO(FMT, ...) printf("[" TEXT_CYAN("i") "] " FMT "\n", ##__VA_ARGS__)
 #define DEBUG_GETCHAR() printf("Press enter for close the program..."); getchar()
 #else
-#define DEBUG_ERROR(FUNCNAME, MESSAGE, ERROR, ...)
-#define DEBUG_INFO(FUNCNAME, MESSAGE, ...)
-#define DEBUG_GETCHAR
+#define DEBUG_ERROR(FMT, ...)
+#define DEBUG_INFO(FMT, ...)
+#define DEBUG_GETCHAR()
 #endif
 
 #endif

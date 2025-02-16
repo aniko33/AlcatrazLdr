@@ -54,9 +54,9 @@ def main(argc: int, argv: list[str]):
     cargo_fd.write(
         "#ifndef CARGO_H\n#define CARGO_H\n"
         +
-        "static " + list_to_c_array_str(shellcode_alphabet, "shellcode_alphabet") 
+        "const " + list_to_c_array_str(shellcode_alphabet, "shellcode_alphabet") 
         +
-        "\nstatic " + list_to_c_array_str(shellcode_encoded, "shellcode_encoded")
+        "\nconst " + list_to_c_array_str(shellcode_encoded, "shellcode_encoded")
         +
         "\n#endif"
     )

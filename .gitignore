@@ -1,5 +1,5 @@
 out/
 tests/*.exe
-shellcode.bin
+*bin
 src/shellcode/cargo.h
 .cache/

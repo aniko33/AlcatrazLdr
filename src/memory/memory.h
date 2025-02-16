@@ -15,12 +15,4 @@ WINBOOL ThreadNameAlloc(
     MEMORY_ALLOC* moduleAllocOut
 );
 
-WINBOOL SleepObf(
-    HANDLE hProcess,
-    LPVOID ptrRegion,
-    SIZE_T regionSize,
-    ULONG time,
-    UNICODE_STRING key
-);
-
 #endif
