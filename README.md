@@ -1,8 +1,9 @@
 # AlcatrazLdr
 
-- [x] Indirect syscalls (HellsGate custom impl)
-- [x] Module stomping
-- [x] Stack/Heap encryption
-- [x] PoolParty injection (direct-I/O)
-- [x] APC WriteVirtualMemory
-- [x] Shellcode obfuscation (word obfuscation)
+*Evasive shellcode loader with indirect syscalls, Thread name-calling allocation, PoolParty injection*
+
+# Table Of Content
+- Features
+- Installation
+- Usage
+- Notes
