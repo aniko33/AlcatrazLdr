@@ -3,3 +3,4 @@ tests/*.exe
 *bin
 src/shellcode/cargo.h
 .cache/
+.compile_commands.json

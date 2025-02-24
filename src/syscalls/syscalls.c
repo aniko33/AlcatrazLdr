@@ -1,5 +1,5 @@
 /* 
-    Search SSNs and execute the syscalls
+    Search SSNs and execute the syscalls - hell's gate impl
 */
 
 #include <stdio.h>

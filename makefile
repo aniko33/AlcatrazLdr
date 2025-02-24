@@ -1,14 +1,11 @@
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -Iinclude -I../lib -lntdll -masm=intel
+CFLAGS = -Iinclude -Iinclude/unwin.h -lntdll -masm=intel
 
-.PHONY: all debug dev clean
+.PHONY: all debug clean
 all: out/main.o out/shellcode.o out/memory.o out/injection.o out/syscalls.o out/ade.o out/alcatrazLdr.exe
 
 debug: CFLAGS += -DDEBUG -g
 debug: clean all
-
-dev: debug
-	cp out/*.exe ~/Documents/shared/
 
 clean:
 	rm -f out/*

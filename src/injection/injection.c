@@ -20,7 +20,7 @@ HANDLE DuplicateHandleK(HANDLE hproc, int pPid, int handleType) {
     HANDLE handleDuplicated;
     ULONG return_sz = 0;
     PSYSTEM_HANDLE_INFORMATION_EX handle_table = malloc(0);
-    
+
     //
     // Get System Handles
     //

