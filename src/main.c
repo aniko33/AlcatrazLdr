@@ -73,7 +73,6 @@ int main() {
     }
 
     DEBUG_INFO("Execution Addr @ 0x%p", memoryShellcodeAlloc.executionAddr);
-    DEBUG_GETCHAR();
 
     Inject(hProcess, completionIoHandle, memoryShellcodeAlloc.executionAddr);
 

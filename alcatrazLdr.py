@@ -85,17 +85,24 @@ def main(parser: argparse.ArgumentParser):
 
     if args.debug:
         compile_cmd = ["make", "clean", "debug"]
+    elif args.docker:
+        docker_status_code = subprocess.run(["docker", "build", "-t", "alcatrazldr", "."], cwd=__dir__).returncode
+        if docker_status_code != 0:
+            errorf("AlcatrazLdr building has been failed")
+            quit(1)
+        compile_cmd = ["docker", "run", "--mount", f"type=bind,source={__dir__}/out,target=/alcatrazLdr/out", "--security-opt", "label:disable", "alcatrazldr"]
     else:
         compile_cmd = ["make", "clean", "all"]
 
     printf("=" * 40 + " Building AlcatrazLdr STARTED " + "=" * 40)
     make_status_code = subprocess.run(compile_cmd, cwd=__dir__).returncode
+    printf("=" * 40 + " Building AlcatrazLdr ENDED " + "=" * 42)
+
     if make_status_code != 0:
         errorf("AlcatrazLdr building has been failed")
     else:
         successf("file has been saved into: 'out/alcatrazLdr.exe'")
 
-    printf("=" * 40 + " Building AlcatrazLdr ENDED " + "=" * 42)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -105,5 +112,6 @@ if __name__ == "__main__":
     parser.add_argument("file", help="File to embed into the loader")
     parser.add_argument("--quiet", "-q", help="No banner", action="store_true")
     parser.add_argument("--debug", "-d", help="Debug flag", action="store_true")
+    parser.add_argument("--docker", "-dk", help="Docker flag", action="store_true")
 
     main(parser)
