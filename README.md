@@ -2,6 +2,40 @@
 
 *An evasive shellcode loader with indirect syscalls, thread name-calling allocation, and PoolParty injection.*
 
+```
+                                -- 
+                               /--\                                                                 
+                              /----\                                                                
+                             |      |                                                               
+                             |      |                                                               
+                             |      |                                                               
+                             |      |                                                               
+                             |      |                                                               
+                             |      |                                                               
+                             |      |                                                               
+                             |      |----------------------------------------------                 
+                             |      /                                              \       #        
+                             |     /                                                \    *#""       
+                             |    /                                                  \     ##"      
+                             |   |----------------------------------------------------|      #"     
+                             |   |                                                    |       #"    
+                             |   |  [||]   [||]   [||]   [||]   [||]   [||]   [||]    |       **"   
+                             |   |                                                    |             
+                             |   |  [||]   [||]   [||]   [||]   [||]   [||]   [||]    |   < EVADE! >
+                             |   |   _____ _         _               __      _        |  /          
+                         @   |   |  |  _  | |___ ___| |_ ___ ___ ___|  |   _| |___    | --    @@$   
+                        @    ++++|  |     | |  _| .'|  _|  _| .'|- _|  |__| . |  _|   |╹_╹ )  @     
+                        @       +|  |__|__|_|___|__,|_| |_| |__,|___|_____|___|_|     |⊂ﾉ    @@     
+                        @        |                                                    |     @@      
+                        @@       ------------------------------------------------------   @@        
+                         @@                                                             @@@         
+                          @@                                                          @@@           
+                           @@                                                     @@@@              
+                             @@                                            @ @@@@@                  
+                               @@@@       @@ @@@@@@@@@@@@    @@   @@@@@@@@@                         
+                                  @@@@@@@@@@@@@@      @@@@@@@@@@@@@
+```
+
 ## Table of Contents
 - [Features](#features)
 - [Installation](#installation)
@@ -34,6 +68,21 @@
 ---
 
 ## Usage
+
+```
+usage: AlcatrazLdr [-h] [--quiet] [--debug] [--docker] file
+
+Evasive shellcode loader with indirect syscalls, Thread name-calling allocation, PoolParty injection
+
+positional arguments:
+  file           File to embed into the loader
+
+options:
+  -h, --help     show this help message and exit
+  --quiet, -q    No banner
+  --debug, -d    Debug flag
+  --docker, -dk  Docker flag
+```
 
 To create a new executable:
 ```bash
