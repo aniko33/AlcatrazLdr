@@ -1,6 +1,6 @@
 - [`debugging`](debugging/): Debugging macros
 - [`injection`](injection/): Injection technique
-- [`memory`](memory/): Memory evasion (module stomping & Heap/Stack encryption)
+- [`memory`](memory/): Memory evasion/allocation (Thread name-calling allocation)
 - [`shellcode`](shellcode/): Shellcode encoding & cargo (`cargo.h`)
 - [`syscalls`](syscalls/): HellsGate implementation (indirect syscall runner)
 - [`main.c`](main.c): The entrypoint :D 
