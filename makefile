@@ -2,7 +2,7 @@ CC = x86_64-w64-mingw32-gcc
 CFLAGS = -Iinclude -Iinclude/unwin.h -lntdll -masm=intel
 
 .PHONY: all debug clean
-all: output_dir out/main.o out/shellcode.o out/memory.o out/injection.o out/syscalls.o out/ade.o out/alcatrazLdr.exe
+all: output_dir out/alcatrazLdr.exe
 
 debug: CFLAGS += -DDEBUG -g
 debug: clean all
@@ -10,7 +10,7 @@ debug: clean all
 clean:
 	rm -f out/*
 
-# Ensure the out directory exists
+# Ensure the output directory exists
 output_dir:
 	@mkdir -p out
 
@@ -36,7 +36,7 @@ out/syscalls.o: src/syscalls/syscalls.c | output_dir
 out/ade.o: src/syscalls/ade.asm | output_dir
 	nasm -f win64 src/syscalls/ade.asm -o out/ade.o
 
-out/alcatrazLdr.exe: out/*.o | output_dir
+out/alcatrazLdr.exe: out/main.o out/shellcode.o out/memory.o out/injection.o out/syscalls.o out/ade.o | output_dir
 	$(CC) out/*.o $(CFLAGS) -o out/alcatrazLdr.exe
 
 #
