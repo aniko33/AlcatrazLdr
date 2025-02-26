@@ -1,5 +1,6 @@
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -Iinclude -Iinclude/unwin.h -lntdll -masm=intel
+TARGET_PROCNAME ?= \"notepad.exe\"
 
 .PHONY: all debug clean
 all: output_dir out/alcatrazLdr.exe
@@ -19,7 +20,7 @@ output_dir:
 #
 
 out/main.o: src/main.c | output_dir
-	$(CC) src/main.c $(CFLAGS) -o out/main.o -c
+	$(CC) src/main.c $(CFLAGS) -DTARGET_PROCESS=$(TARGET_PROCNAME) -o out/main.o -c
 
 out/shellcode.o: src/shellcode/shellcode.c | output_dir
 	$(CC) src/shellcode/shellcode.c $(CFLAGS) -o out/shellcode.o -c

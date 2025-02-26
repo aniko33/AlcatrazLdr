@@ -70,23 +70,33 @@
 ## Usage
 
 ```
-usage: AlcatrazLdr [-h] [--quiet] [--debug] [--docker] file
+usage: AlcatrazLdr [-h] [--target-process TARGET_PROCESS] [--quiet] [--debug]
+                   [--docker]
+                   file
 
-Evasive shellcode loader with indirect syscalls, Thread name-calling allocation, PoolParty injection
+Evasive shellcode loader with indirect syscalls, Thread name-calling
+allocation, PoolParty injection
 
 positional arguments:
-  file           File to embed into the loader
+  file                  File to embed into the loader
 
 options:
-  -h, --help     show this help message and exit
-  --quiet, -q    No banner
-  --debug, -d    Debug flag
-  --docker, -dk  Docker flag
+  -h, --help            show this help message and exit
+  --target-process, -tp TARGET_PROCESS
+                        Target process name to inject
+  --quiet, -q           No banner
+  --debug, -d           Debug flag
+  --docker, -dk         Docker flag
 ```
 
 To create a new executable:
 ```bash
 python alcatrazLdr.py <path_to_shellcode.bin>
+```
+
+To create a new executable with custom target process (default: notepad.exe):
+```bash
+python alcatrazLdr.py <path_to_shellcode.bin> --target-process <target.exe>
 ```
 
 To create a new executable with Docker support:

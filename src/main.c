@@ -15,7 +15,9 @@
 
 extern Ade GlobalAde;
 
+#ifndef TARGET_PROCNAME
 #define TARGET_PROCNAME "notepad.exe"
+#endif
 
 int GetPidByName(char* processName) {
     int pid = 0;
