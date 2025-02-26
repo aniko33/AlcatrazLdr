@@ -56,7 +56,7 @@
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/aniko33/AlcatrazLdr.git
+   git clone https://github.com/aniko33/AlcatrazLdr.git --recurse-submodules
    cd AlcatrazLdr
    ```
 

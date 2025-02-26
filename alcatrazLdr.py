@@ -79,6 +79,8 @@ def main(parser: argparse.ArgumentParser):
         "\n#endif"
     )
 
+    cargo_fd.close()
+
     successf("Shellcode has been encoded and writed into 'src/shellcode/cargo.h'")
 
     # Building executable
